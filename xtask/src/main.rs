@@ -46,6 +46,7 @@ fn main() -> Result<()> {
                 &cargo_data()
                     .root_package()
                     .expect(
+                        // todo: maybe we should just build all ultra packages then?
                         "No root crate, please provide rom crate name or run from rom subdirectory",
                     )
                     .name

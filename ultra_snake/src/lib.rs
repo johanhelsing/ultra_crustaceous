@@ -1,16 +1,26 @@
 use bitflags::bitflags;
+use derive_more::{Deref, DerefMut};
+use glam::{ivec2, IVec2};
 use lazy_static::lazy_static;
-use std::sync::RwLock;
+use rand::{rngs::SmallRng, Rng, SeedableRng};
+use std::{collections::VecDeque, iter, sync::RwLock};
 use wasm_bindgen::prelude::*;
 
 const SCREEN_WIDTH: usize = 320;
 const SCREEN_HEIGHT: usize = 240;
 const OUTPUT_BUFFER_SIZE: usize = SCREEN_WIDTH * SCREEN_HEIGHT;
 
+#[derive(Deref, DerefMut)]
+struct OutputBuffer([u8; OUTPUT_BUFFER_SIZE]);
+
+impl Default for OutputBuffer {
+    fn default() -> Self {
+        OutputBuffer([0; OUTPUT_BUFFER_SIZE])
+    }
+}
+
 lazy_static! {
-    static ref GAME: RwLock<SnakeGame> = RwLock::new(SnakeGame {
-        output_buffer: [0; OUTPUT_BUFFER_SIZE]
-    });
+    static ref GAME: RwLock<SnakeGame> = RwLock::new(SnakeGame::default());
 }
 
 #[wasm_bindgen]
@@ -39,23 +49,155 @@ bitflags! {
         const BUTTON_2 = 1 << 5;
     }
 }
+
+impl Input {
+    fn x(self) -> i8 {
+        match (self.contains(Input::LEFT), self.contains(Input::RIGHT)) {
+            (true, false) => -1,
+            (false, true) => 1,
+            _ => 0,
+        }
+    }
+
+    fn y(self) -> i8 {
+        match (self.contains(Input::DOWN), self.contains(Input::UP)) {
+            (true, false) => -1,
+            (false, true) => 1,
+            _ => 0,
+        }
+    }
+}
+
 // the above will probably be the same for 99% of games, move to a crate / macro?
 
 const TILE_SIZE: usize = 10;
+const MAP_SIZE: IVec2 = IVec2::new(25, 20);
+
 struct SnakeGame {
-    output_buffer: [u8; OUTPUT_BUFFER_SIZE],
+    ticks: usize,
+    output_buffer: OutputBuffer,
+    snake: VecDeque<IVec2>,
+    food: Option<IVec2>,
+    direction: IVec2,
+    sleep: u8,
+    speed: u8,
+    rng: Option<SmallRng>,
+}
+
+impl Default for SnakeGame {
+    fn default() -> Self {
+        let start_pos = IVec2::new(MAP_SIZE.x / 2, MAP_SIZE.y / 2);
+        Self {
+            output_buffer: Default::default(),
+            snake: VecDeque::from_iter(iter::repeat(start_pos).take(5)),
+            direction: IVec2::ZERO, // start stationary
+            speed: 5,
+            sleep: 0,
+            ticks: 0,
+            food: None,
+            rng: None,
+        }
+    }
 }
 
 impl SnakeGame {
     fn update(&mut self, p1: Input, p2: Input) {
+        self.ticks += 1;
+
         let input = p1.union(p2); // let either joystick control
-        for y in 0..SCREEN_HEIGHT {
-            for x in 0..SCREEN_WIDTH {
-                let offset = if !input.is_empty() { 1 } else { 0 };
-                let is_dark_square = (y / TILE_SIZE) % 2 != (x / TILE_SIZE) % 2 + offset;
-                let color = if is_dark_square { 0 } else { 1 };
-                let pixel_index = y * SCREEN_WIDTH + x;
-                self.output_buffer[pixel_index] = color;
+
+        let input_dir = IVec2::new(input.x() as i32, input.y() as i32);
+
+        if input_dir.x.abs() + input_dir.y.abs() == 1 && input_dir != -self.direction {
+            // no diagonal or none movement, also no 180 turns
+            self.direction = input_dir
+        }
+
+        if self.sleep > 0 {
+            self.sleep -= 1;
+            return;
+        }
+
+        // move snake
+        if self.direction != IVec2::ZERO {
+            let head = *self.snake.front().unwrap();
+
+            let new_head_pos = head + self.direction;
+            if new_head_pos.x >= 0
+                && new_head_pos.x < MAP_SIZE.x
+                && new_head_pos.y >= 0
+                && new_head_pos.y < MAP_SIZE.y
+                && !self.snake.iter().skip(1).any(|p| p == &new_head_pos)
+            {
+                self.snake.push_front(new_head_pos);
+                self.snake.pop_back();
+                self.sleep = self.speed;
+
+                if let Some(food) = &self.food {
+                    if &self.snake[0] == food {
+                        self.food = None;
+                        self.snake.push_back(*self.snake.back().unwrap());
+                    }
+                }
+            }
+
+            // currently, we're getting entropy from the number of ticks
+            // passed before we get the first input.
+            // that works ok for snake
+            let rng = self
+                .rng
+                .get_or_insert_with(|| SmallRng::seed_from_u64(self.ticks as u64));
+
+            if self.food.is_none() {
+                self.food = Some(ivec2(
+                    rng.gen_range(0..MAP_SIZE.x),
+                    rng.gen_range(0..MAP_SIZE.y),
+                ));
+            }
+        }
+
+        // clear entire screen
+        for i in 0..OUTPUT_BUFFER_SIZE {
+            // let y = i / SCREEN_WIDTH;
+            // self.output_buffer[i] = if y > 120 { 1 } else { 0 };
+            self.output_buffer[i] = 1;
+        }
+
+        // draw board
+        for x in 0..MAP_SIZE.x {
+            for y in 0..MAP_SIZE.y {
+                draw_tile(&mut self.output_buffer, ivec2(x, y), 0);
+            }
+        }
+
+        // draw snake
+        for tile_pos in self.snake.iter().cloned() {
+            draw_tile(&mut self.output_buffer, tile_pos, 1);
+        }
+
+        // draw food
+        for tile_pos in self.food.iter().cloned() {
+            draw_tile(&mut self.output_buffer, tile_pos, 2);
+        }
+    }
+}
+
+const SCREEN_SIZE: IVec2 = IVec2::new(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32);
+const MAP_POS: IVec2 = IVec2::new(
+    SCREEN_SIZE.x / 2 - MAP_SIZE.x * TILE_SIZE as i32 / 2,
+    SCREEN_SIZE.y / 2 - MAP_SIZE.y * TILE_SIZE as i32 / 2,
+);
+
+fn draw_tile(buffer: &mut OutputBuffer, tile: IVec2, color: u8) {
+    let start_x = MAP_POS.x as usize + tile.x as usize * TILE_SIZE;
+    let start_y = MAP_POS.y as usize + tile.y as usize * TILE_SIZE;
+    let start = start_x + start_y * SCREEN_WIDTH;
+
+    for y in 0..TILE_SIZE {
+        for x in 0..TILE_SIZE {
+            let i = start + x + y * SCREEN_WIDTH;
+            if i < buffer.0.len() {
+                buffer[i] = color;
             }
         }
     }
