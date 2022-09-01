@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "checker_pattern",
+    "xtask"
+]

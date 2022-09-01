@@ -1,0 +1,13 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+env_logger = "0.9"
+log = "0.4"
+xtask-wasm = { version = "0.1.6", features = ["wasm-opt"]}
+zip = "0.6"
+walkdir = "2.3"
+lazy_static = "1.4"
+cargo_metadata = "0.15"
