@@ -2,5 +2,6 @@
 
 members = [
     "checker_pattern",
+    "ultra_snake",
     "xtask"
 ]
