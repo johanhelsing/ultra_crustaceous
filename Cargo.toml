@@ -2,6 +2,7 @@
 
 members = [
     "checker_pattern",
+    "checker_palette",
     "ultra_snake",
     "xtask"
 ]

@@ -252,6 +252,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "checker_palette"
+version = "0.1.0"
+dependencies = [
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "checker_pattern"
 version = "0.1.0"
 dependencies = [
