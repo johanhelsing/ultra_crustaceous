@@ -13,7 +13,7 @@ pub fn get_screen_buffer_pointer() -> *const u8 {
 }
 
 #[wasm_bindgen]
-pub fn update() {
+pub fn update(_p1: u8, _p2: u8) {
     for y in 0..SCREEN_HEIGHT {
         for x in 0..SCREEN_WIDTH {
             let is_dark_square = (y / TILE_SIZE) % 2 != (x / TILE_SIZE) % 2;
