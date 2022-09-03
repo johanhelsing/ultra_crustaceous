@@ -1,3 +1,8 @@
+extern crate wee_alloc;
+
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 use bitflags::bitflags;
 use derive_more::{Deref, DerefMut};
 use glam::{ivec2, IVec2};
@@ -24,7 +29,7 @@ impl Default for OutputBuffer {
 pub struct Color(u8, u8);
 
 impl Color {
-    pub fn from_rgb(rgb: u32) -> Self {
+    pub const fn from_rgb(rgb: u32) -> Self {
         let b = ((rgb & 0xff) >> 4) as u8;
         let g = (((rgb & 0xff00) >> 8) >> 4) as u8;
         let r = (((rgb & 0xff0000) >> 16) >> 4) as u8;
@@ -79,7 +84,7 @@ bitflags! {
 }
 
 impl Input {
-    fn x(self) -> i8 {
+    const fn x(self) -> i8 {
         match (self.contains(Input::LEFT), self.contains(Input::RIGHT)) {
             (true, false) => -1,
             (false, true) => 1,
@@ -87,7 +92,7 @@ impl Input {
         }
     }
 
-    fn y(self) -> i8 {
+    const fn y(self) -> i8 {
         match (self.contains(Input::DOWN), self.contains(Input::UP)) {
             (true, false) => -1,
             (false, true) => 1,
@@ -171,7 +176,7 @@ impl SnakeGame {
                 self.sleep = self.speed;
 
                 if let Some(food) = &self.food {
-                    if &self.snake[0] == food {
+                    if self.snake.front().unwrap() == food {
                         self.food = None;
                         self.snake.push_back(*self.snake.back().unwrap());
                     }

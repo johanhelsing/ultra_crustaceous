@@ -13,3 +13,4 @@ lazy_static = "1.4"
 derive_more = "0.99"
 glam = "0.21"
 rand = {version = "0.8", default-features = false, features = ["small_rng"]}
+wee_alloc = "0.4"

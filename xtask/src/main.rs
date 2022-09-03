@@ -66,6 +66,9 @@ fn main() -> Result<()> {
                 .shrink(3)
                 .optimize(&dist_result.wasm)?;
 
+            let size = std::fs::metadata(&dist_result.wasm)?.len();
+            info!("File size: {}", bytesize::ByteSize(size));
+
             info!("Creating dist dir");
             create_dir_all(&dist_dir)?;
 

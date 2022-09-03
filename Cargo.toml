@@ -6,3 +6,9 @@ members = [
     "ultra_snake",
     "xtask"
 ]
+
+[profile.release]
+opt-level = 3 # fast binaries (and sometimes smaller)
+# opt-level = "z" # small binaries
+# opt-level = "s" # small binaries
+lto = true # smaller binaries
