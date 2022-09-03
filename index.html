@@ -15,6 +15,8 @@
                 height: 100%;
                 width: 100%;
                 background: #000;
+                color: white;
+                font-family: quicksand, sans-serif
             }
             canvas {
                 display:block; 
@@ -22,10 +24,54 @@
                 width: 100%;
                 transform: scaleY(-1)
             }
+            #menu {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: #000a;
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+            }
+            input[type="file"] {
+                display: none;
+            }
+            h1 {
+                margin: 10px;
+            }
+            .menu-item {
+                border: unset;
+                background: unset;
+                font-family: unset;
+                color: unset;
+                font-size: unset;
+                cursor: pointer;
+                transform: scale(1);
+                transition: transform 0.1s;
+                padding: 4px;
+                margin: 3px;
+            }
+            .menu-item:hover {
+                transform: scale(1.1);
+            }
+            .hidden {
+                display: none !important;
+            }
         </style>
     </head>
     <body>
-        <canvas id="canvas" width="320" height="240"></canvas>
+        <canvas id="canvas" class="hidden"></canvas>
+        <div id="menu" class="hidden">
+            <h1>Ultra Zeus</h1>
+
+            <label for="load-game-button" class="menu-item">choose local file</label>
+            <input type="file" id="load-game-button" accept="application/wasm" />
+
+            <button class="menu-item" id="load-url-button">enter url</button>
+        </div>
         <script type="module" src="./index.js"></script>
     </body>
 </html>

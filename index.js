@@ -16,6 +16,8 @@ const inputBits = {
 
 const startGame = async (canvas, game) => {
     const ctx = canvas.getContext('2d');
+    canvas.width = 320;
+    canvas.height = 240;
 
     // track key presses
     var pressedKeys = {};
@@ -93,17 +95,46 @@ const startGame = async (canvas, game) => {
 
 const run = async () => {
     // one-time setup
-    const canvas = document.getElementById("canvas");
+    const canvas = document.getElementById("canvas")
+    const menu = document.getElementById("menu")
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const gameName = urlParams.get("game") ?? "ultra_snake";
-    const path = `./dist/${gameName}/main.wasm`
+    const urlParams = new URLSearchParams(window.location.search)
+    const gameName = urlParams.get("game")
 
-    // const path = prompt("Enter rom url")
-    const game = await loadModule(path)
+    if (gameName) {
+        const path = `./dist/${gameName}/main.wasm`
+        const game = await loadModule(path)
+        canvas.classList.remove("hidden")
+        await startGame(canvas, game)
+    } else {
+        const loadUrlButton = document.getElementById("load-url-button")
+        const fileInput = document.querySelector("input[type=file]");
 
-    await startGame(canvas, game);
+        fileInput.addEventListener("change", () => {
+            console.log("File Selected")
+            const reader = new FileReader()
+            const file = fileInput.files[0]
+            reader.addEventListener("load", async () => {
+                canvas.classList.remove("hidden")
+                const game = await loadModule(reader.result);
+                await startGame(canvas, game)
+                menu.classList.add("hidden")
+            })
+            reader.readAsDataURL(file)
+        })
 
+        loadUrlButton.addEventListener("click", async () => {
+            const path = prompt("Enter rom url")
+            if (path) {
+                const game = await loadModule(path)
+                canvas.classList.remove("hidden")
+                menu.classList.add("hidden")
+                await startGame(canvas, game)
+            }
+        });
+
+        menu.classList.remove("hidden")
+    }
 }
 
 run()
