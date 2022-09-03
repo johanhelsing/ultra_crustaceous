@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Ultra Zeus - Sample emulator</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+            }
+            html, body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+                width: 100%;
+                background: #000;
+            }
+            canvas {
+                display:block; 
+                aspect-ratio: 4 / 3;
+                width: 100%;
+                transform: scaleY(-1)
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="320" height="240"></canvas>
+        <script type="module" src="./index.js"></script>
+    </body>
+</html>
