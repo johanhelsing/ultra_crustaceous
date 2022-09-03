@@ -72,7 +72,7 @@ const startGame = async (canvas, game) => {
             const r = paletteBufferArray[i * 2] << 4;
             const gb = paletteBufferArray[i * 2 + 1];
             const g = gb & 0b111100000;
-            const b = gb & 0b1111 << 4;
+            const b = (gb & 0b1111) << 4;
             palette[i] = { r, g, b }
         }
 
