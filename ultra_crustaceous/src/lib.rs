@@ -57,7 +57,7 @@ bitflags! {
 }
 
 impl Input {
-    pub const fn x(self) -> i8 {
+    pub const fn x(self) -> i32 {
         match (self.contains(Input::LEFT), self.contains(Input::RIGHT)) {
             (true, false) => -1,
             (false, true) => 1,
@@ -65,7 +65,7 @@ impl Input {
         }
     }
 
-    pub const fn y(self) -> i8 {
+    pub const fn y(self) -> i32 {
         match (self.contains(Input::DOWN), self.contains(Input::UP)) {
             (true, false) => -1,
             (false, true) => 1,
