@@ -26,39 +26,16 @@ impl Default for OutputBuffer {
 
 impl OutputBuffer {
     #[inline]
-    pub fn set_pixel<T: Into<usize>, U: Into<usize>, V: Into<u8>>(&mut self, x: T, y: U, color: V) {
-        let x = x.into();
-        let y = y.into();
-        let color = color.into();
-
+    pub fn set_pixel(&mut self, x: usize, y: usize, color: u8) {
+        debug_assert!(x < SCREEN_WIDTH);
+        debug_assert!(y < SCREEN_HEIGHT);
         let i = x + y * SCREEN_WIDTH;
-        if i < self.0.len() {
-            self[i] = color;
-        }
+        self[i] = color;
     }
 
-    pub fn blit_color<
-        TX: Into<usize>,
-        TY: Into<usize>,
-        TWidth: Into<usize>,
-        THeight: Into<usize>,
-        TColor: Into<u8>,
-    >(
-        &mut self,
-        x: TX,
-        y: TY,
-        width: TWidth,
-        height: THeight,
-        color: TColor,
-    ) {
-        let start_x = x.into();
-        let start_y = y.into();
-        let color = color.into();
-        let height = height.into();
-        let width = width.into();
-
-        for y in start_y..start_y + height {
-            for x in start_x..start_x + width {
+    pub fn blit_color(&mut self, x: usize, y: usize, width: usize, height: usize, color: u8) {
+        for y in y..y + height {
+            for x in x..x + width {
                 self.set_pixel(x, y, color);
             }
         }
