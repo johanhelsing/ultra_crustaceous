@@ -2863,9 +2863,33 @@ dependencies = [
  "derive_more",
  "iyes_loopless",
  "once_cell",
+ "send_wrapper",
+ "ultra_bevy_derive",
+ "ultra_crustaceous",
+ "wasm-bindgen",
+ "wee_alloc",
+]
+
+[[package]]
+name = "ultra_bevy_derive"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "ultra_bevy_snake"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_system_graph",
+ "derive_more",
+ "iyes_loopless",
+ "once_cell",
  "rand",
  "send_wrapper",
- "ultra_crustaceous",
+ "ultra_bevy",
  "wasm-bindgen",
  "wee_alloc",
 ]

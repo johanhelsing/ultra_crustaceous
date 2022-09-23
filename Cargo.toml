@@ -4,6 +4,8 @@ members = [
     "checker_pattern",
     "checker_palette",
     "ultra_bevy",
+    "ultra_bevy_derive",
+    "ultra_bevy_snake",
     "ultra_crustaceous",
     "ultra_snake",
     "ultra_snake_standalone",
