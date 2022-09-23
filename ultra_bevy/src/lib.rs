@@ -335,67 +335,6 @@ fn draw_snake(
     }
 }
 
-// struct SnakeGame {
-//     food: Option<IVec2>,
-//     rng: Option<SmallRng>,
-// }
-
-// // impl Default for SnakeGame {
-// //     fn default() -> Self {
-// //         Self {
-// //             food: None,
-// //             rng: None,
-// //         }
-// //     }
-// // }
-
-// impl SnakeGame {
-//     fn update(&mut self, p1: Input, p2: Input) {
-//         // move snake
-//         if self.direction != IVec2::ZERO {
-//             let head = *self.snake.front().unwrap();
-
-//             let new_head_pos = head + self.direction;
-//             if new_head_pos.x >= 0
-//                 && new_head_pos.x < MAP_SIZE.x
-//                 && new_head_pos.y >= 0
-//                 && new_head_pos.y < MAP_SIZE.y
-//                 && !self.snake.iter().skip(1).any(|p| p == &new_head_pos)
-//             {
-//                 self.snake.push_front(new_head_pos);
-//                 self.snake.pop_back();
-//                 self.sleep = self.speed;
-
-//                 if let Some(food) = &self.food {
-//                     if self.snake.front().unwrap() == food {
-//                         self.food = None;
-//                         self.snake.push_back(*self.snake.back().unwrap());
-//                     }
-//                 }
-//             }
-
-//             // currently, we're getting entropy from the number of ticks
-//             // passed before we get the first input.
-//             // that works ok for snake
-//             let rng = self
-//                 .rng
-//                 .get_or_insert_with(|| SmallRng::seed_from_u64(self.ticks as u64));
-
-//             if self.food.is_none() {
-//                 self.food = Some(ivec2(
-//                     rng.gen_range(0..MAP_SIZE.x),
-//                     rng.gen_range(0..MAP_SIZE.y),
-//                 ));
-//             }
-//         }
-
-//         // draw food
-//         for tile_pos in self.food.iter().cloned() {
-//             draw_tile(&mut self.output_buffer, tile_pos, 4);
-//         }
-//     }
-// }
-
 const SCREEN_SIZE: IVec2 = IVec2::new(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32);
 
 const MAP_POS: IVec2 = IVec2::new(
