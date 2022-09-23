@@ -283,7 +283,13 @@ fn eat_apples(
 
                 // move the apple
                 let rng = rng.0.get_or_insert_with(|| SmallRng::from(*tick));
-                **apple_pos = ivec2(rng.gen_range(0..MAP_SIZE.x), rng.gen_range(0..MAP_SIZE.y));
+                loop {
+                    **apple_pos = ivec2(rng.gen_range(0..MAP_SIZE.x), rng.gen_range(0..MAP_SIZE.y));
+                    // Make sure we don't spawn inside snake
+                    if body_positions.iter().all(|p| *p != *apple_pos) {
+                        break;
+                    }
+                }
             }
         }
     }
