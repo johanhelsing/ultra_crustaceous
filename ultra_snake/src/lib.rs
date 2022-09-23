@@ -3,48 +3,14 @@ extern crate wee_alloc;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-use bitflags::bitflags;
-use derive_more::{Deref, DerefMut};
 use glam::{ivec2, IVec2};
 use lazy_static::lazy_static;
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use std::{collections::VecDeque, iter, sync::RwLock};
+use ultra_crustaceous::{
+    Color, Input, OutputBuffer, PaletteBuffer, OUTPUT_BUFFER_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH,
+};
 use wasm_bindgen::prelude::*;
-
-const SCREEN_WIDTH: usize = 320;
-const SCREEN_HEIGHT: usize = 240;
-const OUTPUT_BUFFER_SIZE: usize = SCREEN_WIDTH * SCREEN_HEIGHT;
-const PALETTE_COLORS: usize = 32;
-
-#[derive(Deref, DerefMut)]
-struct OutputBuffer([u8; OUTPUT_BUFFER_SIZE]);
-
-impl Default for OutputBuffer {
-    fn default() -> Self {
-        OutputBuffer([0; OUTPUT_BUFFER_SIZE])
-    }
-}
-
-#[derive(Clone, Copy)]
-pub struct Color(u8, u8);
-
-impl Color {
-    pub const fn from_rgb(rgb: u32) -> Self {
-        let b = ((rgb & 0xff) >> 4) as u8;
-        let g = (((rgb & 0xff00) >> 8) >> 4) as u8;
-        let r = (((rgb & 0xff0000) >> 16) >> 4) as u8;
-        Color(r, (g << 4) | b)
-    }
-}
-
-#[derive(Deref, DerefMut)]
-pub struct PaletteBuffer([Color; PALETTE_COLORS]);
-
-impl Default for PaletteBuffer {
-    fn default() -> Self {
-        PaletteBuffer([Color(0, 0); PALETTE_COLORS])
-    }
-}
 
 lazy_static! {
     static ref GAME: RwLock<SnakeGame> = RwLock::new(SnakeGame::default());
@@ -72,36 +38,7 @@ pub fn update(p1: u8, p2: u8) {
         .update(p1, p2);
 }
 
-bitflags! {
-    struct Input: u8 {
-        const UP = 1 << 0;
-        const DOWN = 1 << 1;
-        const LEFT = 1 << 2;
-        const RIGHT = 1 << 3;
-        const BUTTON_1 = 1 << 4;
-        const BUTTON_2 = 1 << 5;
-    }
-}
-
-impl Input {
-    const fn x(self) -> i8 {
-        match (self.contains(Input::LEFT), self.contains(Input::RIGHT)) {
-            (true, false) => -1,
-            (false, true) => 1,
-            _ => 0,
-        }
-    }
-
-    const fn y(self) -> i8 {
-        match (self.contains(Input::DOWN), self.contains(Input::UP)) {
-            (true, false) => -1,
-            (false, true) => 1,
-            _ => 0,
-        }
-    }
-}
-
-// the above will probably be the same for 99% of games, move to a crate / macro?
+// above is boiler-plate
 
 const TILE_SIZE: usize = 10;
 const MAP_SIZE: IVec2 = IVec2::new(25, 20);

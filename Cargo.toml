@@ -3,7 +3,9 @@
 members = [
     "checker_pattern",
     "checker_palette",
+    "ultra_crustaceous",
     "ultra_snake",
+    "ultra_snake_standalone",
     "xtask"
 ]
 
