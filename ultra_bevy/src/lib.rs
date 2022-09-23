@@ -173,13 +173,17 @@ impl SnakeBodyBundle {
     }
 }
 
+const BORDER_COLOR: u8 = 0;
+const MAP_COLOR: u8 = 1;
+const WORM_COLOR: u8 = 2;
+const APPLE_COLOR: u8 = 3;
+const DEAD_WORM_COLOR: u8 = APPLE_COLOR;
+
 fn setup(mut commands: Commands, mut palette: ResMut<PaletteBuffer>) {
-    // TODO: convert from bevy colors?
-    palette[0] = UltraColor::from_rgb(0x302c2e); // dark brown
-    palette[1] = UltraColor::from_rgb(0x7d7071); // light brown
-    palette[2] = UltraColor::from_rgb(0x7d7071); // light brown
-    palette[3] = UltraColor::from_rgb(0x71aa34); // green
-    palette[4] = UltraColor::from_rgb(0xa93b3b); // deep red
+    palette[BORDER_COLOR as usize] = UltraColor::from_rgb(0x302c2e); // dark brown
+    palette[MAP_COLOR as usize] = UltraColor::from_rgb(0x7d7071); // light brown
+    palette[WORM_COLOR as usize] = UltraColor::from_rgb(0x71aa34); // green
+    palette[APPLE_COLOR as usize] = UltraColor::from_rgb(0xa93b3b); // deep red
 
     let start_pos = TilePos(MAP_SIZE / 2);
 
@@ -309,14 +313,14 @@ fn update_body_dir(
 fn draw_background(mut screen: ResMut<OutputBuffer>) {
     for x in 0..MAP_SIZE.x {
         for y in 0..MAP_SIZE.y {
-            draw_tile(&mut *screen, TilePos(ivec2(x, y)), 1);
+            draw_tile(&mut *screen, TilePos(ivec2(x, y)), MAP_COLOR);
         }
     }
 }
 
 fn draw_apples(apples: Query<&TilePos, With<Apple>>, mut screen: ResMut<OutputBuffer>) {
     for pos in apples.iter() {
-        draw_tile(&mut *screen, *pos, 4);
+        draw_tile(&mut *screen, *pos, APPLE_COLOR);
     }
 }
 
@@ -326,8 +330,8 @@ fn draw_snake(
     mut screen: ResMut<OutputBuffer>,
 ) {
     let color = match *state {
-        State::GameOver => 4,
-        _ => 3,
+        State::GameOver => DEAD_WORM_COLOR,
+        _ => WORM_COLOR,
     };
 
     for pos in heads.iter() {
