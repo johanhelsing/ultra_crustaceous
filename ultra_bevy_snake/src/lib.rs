@@ -63,7 +63,7 @@ fn init() -> App {
 
     let graph = SystemGraph::new();
 
-    // todo: clean up when stageless is implemented
+    // todo: clean up when bevy stageless rfc is implemented
     graph
         .root(tick)
         .then(update_head_dir.run_if(alive))
@@ -159,7 +159,6 @@ fn update_head_dir(mut heads: Query<&mut Direction, With<SnakeHead>>, input: Res
     }
 }
 
-// combine with move_body?
 fn move_head(
     mut state: ResMut<State>,
     mut heads: Query<(&mut TilePos, &Direction), With<SnakeHead>>,
