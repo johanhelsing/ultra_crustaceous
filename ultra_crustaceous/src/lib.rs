@@ -45,6 +45,7 @@ impl Color {
 }
 
 bitflags! {
+    #[derive(Default)]
     pub struct Input: u8 {
         const UP = 1 << 0;
         const DOWN = 1 << 1;

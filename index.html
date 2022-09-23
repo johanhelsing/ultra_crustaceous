@@ -86,7 +86,19 @@
     <script type="module">
         const loadModule = async (path) => {
             const response = await fetch(path)
-            const imports = {}
+            const imports = {
+                wbg: {
+                    __wbindgen_throw: function() { console.error(arguments) },
+                },
+                wasi_snapshot_preview1: {
+                    fd_write: () => {},
+                    environ_get: () => {},
+                    environ_sizes_get: () => {},
+                    proc_exit: () => {},
+                    random_get: () => {},
+                    sched_yield: () => {},
+                },
+            }
             const { instance } = await WebAssembly.instantiateStreaming(response, imports)
             return instance.exports
         }
