@@ -87,6 +87,9 @@ struct Direction(IVec2);
 #[derive(Component)]
 struct SnakeHead;
 
+#[derive(Component)]
+struct SnakeBody(Entity);
+
 #[derive(Default, Deref, DerefMut)]
 struct Tick(usize);
 
@@ -102,10 +105,12 @@ fn init() -> App {
     // todo: clean up when stageless is implemented
     graph
         .root(tick)
-        .then(update_head_direction)
-        .then(move_snake.run_if(on_step))
+        .then(update_head_dir)
+        .then(move_head.run_if(on_step))
+        .then(move_body.run_if(on_step))
+        .then(update_body_dir.run_if(on_step))
         .then(draw_background.run_if(on_step))
-        .then(draw_snake_head.run_if(on_step));
+        .then(draw_head.run_if(on_step));
 
     app.add_system_set(graph.into());
 
@@ -117,13 +122,26 @@ const MAP_SIZE: IVec2 = ivec2(25, 20);
 const TICKS_PER_STEP: usize = 5;
 
 fn setup(mut commands: Commands, mut palette: ResMut<PaletteBuffer>) {
+    // TODO: convert from bevy colors?
     palette[0] = UltraColor::from_rgb(0x302c2e); // dark brown
     palette[1] = UltraColor::from_rgb(0x7d7071); // light brown
     palette[2] = UltraColor::from_rgb(0x7d7071); // light brown
     palette[3] = UltraColor::from_rgb(0x71aa34); // green
     palette[4] = UltraColor::from_rgb(0xa93b3b); // deep red
 
-    commands.spawn_bundle((TilePos(MAP_SIZE / 2), Direction(IVec2::ZERO), SnakeHead));
+    let mut tail = commands
+        .spawn_bundle((SnakeHead, TilePos(MAP_SIZE / 2), Direction(IVec2::ZERO)))
+        .id();
+
+    for _ in 0..5 {
+        tail = commands
+            .spawn_bundle((
+                SnakeBody(tail),
+                TilePos(MAP_SIZE / 2),
+                Direction(IVec2::ZERO),
+            ))
+            .id();
+    }
 }
 
 fn tick(mut tick: ResMut<Tick>) {
@@ -134,14 +152,11 @@ fn on_step(tick: Res<Tick>) -> bool {
     **tick % TICKS_PER_STEP == 0
 }
 
-fn update_head_direction(
-    mut heads: Query<&mut Direction, With<SnakeHead>>,
-    input: Res<UltraInput>,
-) {
+fn update_head_dir(mut heads: Query<&mut Direction, With<SnakeHead>>, input: Res<UltraInput>) {
     // combine input
     let input = input.p1 | input.p2;
 
-    let input_dir = IVec2::new(input.x() as i32, input.y() as i32);
+    let input_dir = ivec2(input.x() as i32, input.y() as i32);
 
     // check for diagonal or no movement
     if input_dir.x.abs() + input_dir.y.abs() == 1 {
@@ -154,13 +169,32 @@ fn update_head_direction(
     }
 }
 
-fn move_snake(mut heads: Query<(&mut TilePos, &Direction), With<SnakeHead>>) {
+// combine with move_body?
+fn move_head(mut heads: Query<(&mut TilePos, &Direction), With<SnakeHead>>) {
     for (mut pos, dir) in heads.iter_mut() {
+        let new_pos = **pos + **dir;
+        **pos = new_pos;
+    }
+}
+
+fn move_body(mut parts: Query<(&mut TilePos, &Direction), With<SnakeBody>>) {
+    for (mut pos, dir) in parts.iter_mut() {
         **pos += **dir;
     }
 }
 
-fn draw_snake_head(heads: Query<&TilePos, With<SnakeHead>>, mut screen: ResMut<OutputBuffer>) {
+fn update_body_dir(
+    mut parts: Query<(&mut Direction, &TilePos, &SnakeBody)>,
+    positions: Query<&TilePos>,
+) {
+    for (mut dir, pos, body) in parts.iter_mut() {
+        let next = body.0;
+        let next_pos = positions.get(next).unwrap();
+        **dir = **next_pos - **pos;
+    }
+}
+
+fn draw_head(heads: Query<&TilePos>, mut screen: ResMut<OutputBuffer>) {
     for pos in heads.iter() {
         draw_tile(&mut *screen, *pos, 3);
     }
@@ -175,26 +209,13 @@ fn draw_background(mut screen: ResMut<OutputBuffer>) {
 }
 
 // struct SnakeGame {
-//     ticks: usize,
 //     food: Option<IVec2>,
-//     direction: IVec2,
-//     sleep: u8,
-//     speed: u8,
 //     rng: Option<SmallRng>,
 // }
 
 // // impl Default for SnakeGame {
 // //     fn default() -> Self {
-// //         let start_pos = IVec2::new(MAP_SIZE.x / 2, MAP_SIZE.y / 2);
-
 // //         Self {
-// //             output_buffer: Default::default(),
-// //             palette,
-// //             snake: VecDeque::from_iter(iter::repeat(start_pos).take(5)),
-// //             direction: IVec2::ZERO, // start stationary
-// //             speed: 5,
-// //             sleep: 0,
-// //             ticks: 0,
 // //             food: None,
 // //             rng: None,
 // //         }
@@ -203,22 +224,6 @@ fn draw_background(mut screen: ResMut<OutputBuffer>) {
 
 // impl SnakeGame {
 //     fn update(&mut self, p1: Input, p2: Input) {
-//         self.ticks += 1;
-
-//         let input = p1.union(p2); // let either joystick control
-
-//         let input_dir = IVec2::new(input.x() as i32, input.y() as i32);
-
-//         if input_dir.x.abs() + input_dir.y.abs() == 1 && input_dir != -self.direction {
-//             // no diagonal or none movement, also no 180 turns
-//             self.direction = input_dir
-//         }
-
-//         if self.sleep > 0 {
-//             self.sleep -= 1;
-//             return;
-//         }
-
 //         // move snake
 //         if self.direction != IVec2::ZERO {
 //             let head = *self.snake.front().unwrap();
@@ -254,20 +259,6 @@ fn draw_background(mut screen: ResMut<OutputBuffer>) {
 //                     rng.gen_range(0..MAP_SIZE.x),
 //                     rng.gen_range(0..MAP_SIZE.y),
 //                 ));
-//             }
-//         }
-
-//         // clear entire screen
-//         for i in 0..OUTPUT_BUFFER_SIZE {
-//             // let y = i / SCREEN_WIDTH;
-//             // self.output_buffer[i] = if y > 120 { 1 } else { 0 };
-//             self.output_buffer[i] = 0;
-//         }
-
-//         // draw board
-//         for x in 0..MAP_SIZE.x {
-//             for y in 0..MAP_SIZE.y {
-//                 draw_tile(&mut self.output_buffer, ivec2(x, y), 1);
 //             }
 //         }
 
