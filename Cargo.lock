@@ -1430,8 +1430,6 @@ dependencies = [
 name = "ultra_snake"
 version = "0.1.0"
 dependencies = [
- "bitflags",
- "derive_more",
  "glam",
  "lazy_static",
  "rand",
