@@ -276,14 +276,5 @@ const MAP_POS: IVec2 = IVec2::new(
 fn draw_tile(buffer: &mut OutputBuffer, tile: TilePos, color: u8) {
     let start_x = MAP_POS.x as usize + tile.x as usize * TILE_SIZE;
     let start_y = MAP_POS.y as usize + tile.y as usize * TILE_SIZE;
-    let start = start_x + start_y * SCREEN_WIDTH;
-
-    for y in 0..TILE_SIZE {
-        for x in 0..TILE_SIZE {
-            let i = start + x + y * SCREEN_WIDTH;
-            if i < buffer.0.len() {
-                buffer[i] = color;
-            }
-        }
-    }
+    buffer.blit_color(start_x, start_y, TILE_SIZE, TILE_SIZE, color)
 }
