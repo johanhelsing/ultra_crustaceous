@@ -1,3 +1,5 @@
+#![no_std]
+
 use bitflags::bitflags;
 use derive_more::{Deref, DerefMut};
 
