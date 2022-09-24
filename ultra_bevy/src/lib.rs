@@ -10,7 +10,7 @@ use bevy::prelude::*;
 use send_wrapper::SendWrapper;
 pub use ultra_crustaceous::Color as UltraColor;
 pub use ultra_crustaceous::{self};
-use ultra_crustaceous::{OutputBuffer, PaletteBuffer};
+use ultra_crustaceous::{PaletteBuffer, ScreenBuffer};
 use wasm_bindgen::prelude::*;
 
 // everything has to be static state, but we hide that as best as we can from the user
@@ -31,7 +31,7 @@ pub fn get_screen_buffer_pointer() -> *const u8 {
         .as_ref()
         .unwrap()
         .world
-        .get_resource::<OutputBuffer>()
+        .get_resource::<ScreenBuffer>()
         .expect(
             "Couldn't find output buffer resource in bevy app. Did you forget to add UltraPlugin?",
         )
@@ -64,7 +64,7 @@ pub struct UltraPlugin;
 
 impl Plugin for UltraPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<OutputBuffer>();
+        app.init_resource::<ScreenBuffer>();
         app.init_resource::<PaletteBuffer>();
         app.init_resource::<UltraInput>();
     }

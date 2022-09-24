@@ -3,58 +3,48 @@
 use bitflags::bitflags;
 use derive_more::{Deref, DerefMut};
 
-/// Width of the screen buffer in pixels
-pub const SCREEN_WIDTH: usize = 320;
-
-/// Height of the screen buffer in pixels
-pub const SCREEN_HEIGHT: usize = 240;
-
-/// Number of pixels in the screen buffer
-pub const OUTPUT_BUFFER_SIZE: usize = SCREEN_WIDTH * SCREEN_HEIGHT;
-
 /// Number of colors in the palette buffer
 pub const PALETTE_COLORS: usize = 32;
 
 #[derive(Deref, DerefMut)]
-pub struct OutputBuffer(pub [u8; OUTPUT_BUFFER_SIZE]);
+pub struct ScreenBuffer(pub [u8; Self::NUM_PIXELS]);
 
-impl Default for OutputBuffer {
+impl Default for ScreenBuffer {
     fn default() -> Self {
-        OutputBuffer([0; OUTPUT_BUFFER_SIZE])
+        ScreenBuffer([0; Self::NUM_PIXELS])
     }
 }
 
 /// todo: some of these could just be an extension trait? Maybe a crate already exists?
-impl OutputBuffer {
+impl ScreenBuffer {
+    /// Width of the screen buffer in pixels
+    pub const WIDTH: usize = 320;
+
+    /// Height of the screen buffer in pixels
+    pub const HEIGHT: usize = 240;
+
+    /// Number of pixels in the screen buffer
+    pub const NUM_PIXELS: usize = Self::WIDTH * Self::HEIGHT;
+
     /// Set a single pixel to the given color
     #[inline]
     pub fn set_pixel(&mut self, x: usize, y: usize, color: u8) {
-        debug_assert!(x < Self::width());
-        let i = x + y * Self::width();
+        debug_assert!(x < Self::WIDTH);
+        let i = x + y * Self::WIDTH;
         self[i] = color;
     }
 
     /// Gets a pixel
     #[inline]
     pub fn get_pixel(&self, x: usize, y: usize) -> u8 {
-        debug_assert!(x < Self::width());
-        let i = x + y * Self::width();
+        debug_assert!(x < Self::WIDTH);
+        let i = x + y * Self::WIDTH;
         self[i]
-    }
-
-    #[inline]
-    pub const fn width() -> usize {
-        SCREEN_WIDTH
-    }
-
-    #[inline]
-    pub const fn height() -> usize {
-        SCREEN_HEIGHT
     }
 }
 
 #[cfg(feature = "rastateur")]
-impl rastateur::PixelBuffer<u8> for OutputBuffer {
+impl rastateur::PixelBuffer<u8> for ScreenBuffer {
     #[inline]
     fn set_pixel<TPos: Into<(usize, usize)>>(&mut self, pos: TPos, color: u8) {
         let (x, y) = pos.into();
@@ -69,38 +59,38 @@ impl rastateur::PixelBuffer<u8> for OutputBuffer {
 
     #[inline]
     fn width(&self) -> usize {
-        Self::width()
+        Self::WIDTH
     }
 
     #[inline]
     fn height(&self) -> usize {
-        Self::height()
+        Self::HEIGHT
     }
 }
 
 // todo: maybe do blanket impls for this in rastateur?
 #[cfg(feature = "rastateur")]
-impl rastateur::PixelBuffer<u8, i32> for OutputBuffer {
+impl rastateur::PixelBuffer<u8, i32> for ScreenBuffer {
     #[inline]
     fn set_pixel<TPos: Into<(i32, i32)>>(&mut self, pos: TPos, color: u8) {
         let (x, y) = pos.into();
-        OutputBuffer::set_pixel(self, x as usize, y as usize, color);
+        ScreenBuffer::set_pixel(self, x as usize, y as usize, color);
     }
 
     #[inline]
     fn get_pixel<TPos: Into<(i32, i32)>>(&self, pos: TPos) -> u8 {
         let (x, y) = pos.into();
-        OutputBuffer::get_pixel(self, x as usize, y as usize)
+        ScreenBuffer::get_pixel(self, x as usize, y as usize)
     }
 
     #[inline]
     fn width(&self) -> i32 {
-        Self::width() as i32
+        Self::WIDTH as i32
     }
 
     #[inline]
     fn height(&self) -> i32 {
-        Self::height() as i32
+        Self::HEIGHT as i32
     }
 }
 

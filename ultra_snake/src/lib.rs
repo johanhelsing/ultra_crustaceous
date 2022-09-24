@@ -7,9 +7,7 @@ use glam::{ivec2, IVec2};
 use lazy_static::lazy_static;
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use std::{collections::VecDeque, iter, sync::RwLock};
-use ultra_crustaceous::{
-    Color, Input, OutputBuffer, PaletteBuffer, OUTPUT_BUFFER_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH,
-};
+use ultra_crustaceous::{Color, Input, PaletteBuffer, ScreenBuffer};
 use wasm_bindgen::prelude::*;
 
 lazy_static! {
@@ -45,7 +43,7 @@ const MAP_SIZE: IVec2 = IVec2::new(25, 20);
 
 struct SnakeGame {
     ticks: usize,
-    output_buffer: OutputBuffer,
+    output_buffer: ScreenBuffer,
     palette: PaletteBuffer,
     snake: VecDeque<IVec2>,
     food: Option<IVec2>,
@@ -136,9 +134,7 @@ impl SnakeGame {
         }
 
         // clear entire screen
-        for i in 0..OUTPUT_BUFFER_SIZE {
-            // let y = i / SCREEN_WIDTH;
-            // self.output_buffer[i] = if y > 120 { 1 } else { 0 };
+        for i in 0..ScreenBuffer::NUM_PIXELS {
             self.output_buffer[i] = 0;
         }
 
@@ -167,7 +163,7 @@ const MAP_POS: IVec2 = IVec2::new(
     SCREEN_SIZE.y / 2 - MAP_SIZE.y * TILE_SIZE as i32 / 2,
 );
 
-fn draw_tile(buffer: &mut OutputBuffer, tile: IVec2, color: u8) {
+fn draw_tile(buffer: &mut ScreenBuffer, tile: IVec2, color: u8) {
     let start_x = MAP_POS.x as usize + tile.x as usize * TILE_SIZE;
     let start_y = MAP_POS.y as usize + tile.y as usize * TILE_SIZE;
     let start = start_x + start_y * SCREEN_WIDTH;

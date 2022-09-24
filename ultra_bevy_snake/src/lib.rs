@@ -9,6 +9,17 @@ use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 use ultra_bevy::prelude::*;
 
+const SCREEN_SIZE: IVec2 = IVec2::new(ScreenBuffer::WIDTH as i32, ScreenBuffer::HEIGHT as i32);
+
+const TILE_SIZE: usize = 10;
+const MAP_SIZE: IVec2 = ivec2(25, 20);
+const MAP_POS: IVec2 = IVec2::new(
+    SCREEN_SIZE.x / 2 - MAP_SIZE.x * TILE_SIZE as i32 / 2,
+    SCREEN_SIZE.y / 2 - MAP_SIZE.y * TILE_SIZE as i32 / 2,
+);
+
+const TICKS_PER_STEP: usize = 5;
+
 #[derive(Component, Deref, DerefMut, Clone, Copy, From, PartialEq, Eq)]
 struct TilePos(IVec2);
 
@@ -17,7 +28,7 @@ impl TilePos {
         MAP_POS + self.0 * TILE_SIZE as i32
     }
 
-    pub fn draw_filled(&self, buffer: &mut OutputBuffer, color: u8) {
+    pub fn draw_filled(&self, buffer: &mut ScreenBuffer, color: u8) {
         buffer.draw_rect(self.to_screen_pos(), IVec2::splat(TILE_SIZE as i32), color);
     }
 }
@@ -89,10 +100,6 @@ fn init() -> App {
 
     app
 }
-
-const TILE_SIZE: usize = 10;
-const MAP_SIZE: IVec2 = ivec2(25, 20);
-const TICKS_PER_STEP: usize = 5;
 
 #[derive(Bundle)]
 struct SnakeBodyBundle {
@@ -247,11 +254,11 @@ fn update_body_dir(
     }
 }
 
-fn draw_background(mut screen: ResMut<OutputBuffer>) {
+fn draw_background(mut screen: ResMut<ScreenBuffer>) {
     screen.draw_rect(MAP_POS, MAP_SIZE * TILE_SIZE as i32, MAP_COLOR);
 }
 
-fn draw_apples(apples: Query<&TilePos, With<Apple>>, mut screen: ResMut<OutputBuffer>) {
+fn draw_apples(apples: Query<&TilePos, With<Apple>>, mut screen: ResMut<ScreenBuffer>) {
     for tile in apples.iter() {
         tile.draw_filled(screen.as_mut(), APPLE_COLOR);
     }
@@ -260,7 +267,7 @@ fn draw_apples(apples: Query<&TilePos, With<Apple>>, mut screen: ResMut<OutputBu
 fn draw_snake(
     state: Res<State>,
     heads: Query<&TilePos, Or<(With<SnakeBody>, With<SnakeHead>)>>,
-    mut screen: ResMut<OutputBuffer>,
+    mut screen: ResMut<ScreenBuffer>,
 ) {
     let color = match *state {
         State::GameOver => DEAD_WORM_COLOR,
@@ -271,10 +278,3 @@ fn draw_snake(
         tile.draw_filled(screen.as_mut(), color);
     }
 }
-
-const SCREEN_SIZE: IVec2 = IVec2::new(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32);
-
-const MAP_POS: IVec2 = IVec2::new(
-    SCREEN_SIZE.x / 2 - MAP_SIZE.x * TILE_SIZE as i32 / 2,
-    SCREEN_SIZE.y / 2 - MAP_SIZE.y * TILE_SIZE as i32 / 2,
-);
