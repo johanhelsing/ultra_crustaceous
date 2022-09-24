@@ -9,15 +9,17 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 use bevy::prelude::*;
 use send_wrapper::SendWrapper;
 pub use ultra_crustaceous::Color as UltraColor;
-pub use ultra_crustaceous::*;
+use ultra_crustaceous::{OutputBuffer, PaletteBuffer};
+pub use ultra_crustaceous::{self};
 use wasm_bindgen::prelude::*;
 
+// everything has to be static state, but we hide that as best as we can from the user
 static mut BEVY_APP: Option<SendWrapper<App>> = None;
 
 pub use ultra_bevy_derive::init;
 
 pub mod prelude {
-    pub use crate::{UltraColor, UltraInput, UltraPlugin};
+    pub use crate::{Screen, UltraColor, UltraInput, UltraPlugin};
     pub use ultra_crustaceous::*;
 }
 
@@ -58,6 +60,15 @@ pub struct UltraInput {
 }
 
 pub struct UltraPlugin;
+
+#[derive(Deref, DerefMut)]
+pub struct Screen(OutputBuffer);
+
+impl Screen {
+    pub fn set_pixel(&mut self, pos: IVec2, color: u8) {
+        self.0.set_pixel(pos.x as usize, pos.y as usize, color);
+    }
+}
 
 impl Plugin for UltraPlugin {
     fn build(&self, app: &mut App) {

@@ -24,17 +24,20 @@ impl Default for OutputBuffer {
     }
 }
 
+/// todo: some of these could just be an extension trait? Maybe a crate already exists?
 impl OutputBuffer {
+    /// Set a single pixel to the given color
     #[inline]
     pub fn set_pixel(&mut self, x: usize, y: usize, color: u8) {
         debug_assert!(x < SCREEN_WIDTH);
-        debug_assert!(y < SCREEN_HEIGHT);
         let i = x + y * SCREEN_WIDTH;
         self[i] = color;
     }
 
-    pub fn blit_color(&mut self, x: usize, y: usize, width: usize, height: usize, color: u8) {
+    /// Fills a rectangular area with a single color
+    pub fn fill_rect(&mut self, x: usize, y: usize, width: usize, height: usize, color: u8) {
         for y in y..y + height {
+            // inner loop on x for efficient memory access
             for x in x..x + width {
                 self.set_pixel(x, y, color);
             }

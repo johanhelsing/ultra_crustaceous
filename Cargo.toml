@@ -3,6 +3,7 @@
 members = [
     "checker_pattern",
     "checker_palette",
+    "rastateur",
     "ultra_bevy",
     "ultra_bevy_derive",
     "ultra_bevy_snake",
