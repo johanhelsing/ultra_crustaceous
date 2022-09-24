@@ -1,20 +1,22 @@
 #![no_std]
 
+use num_integer::Integer;
+
 // todo: could perhaps relax trait bound on Copy
 /// Implement this trait enable drawing methods on your buffer
 ///
 /// Note: You only need to implement the four basic methods (`get_pixel`,
 /// `set_pixel`, `width` and `height`) to be able to draw complex shapes,
 /// everything else has default implementations.
-pub trait PixelBuffer<TPixel: Clone + Copy> {
+pub trait PixelBuffer<TColor: Clone + Copy, TCoord: Integer> {
     /// Set the pixel at the given position to a specific color
     ///
     /// It's up to the implementor how to store the pixels, but the drawing
     /// algorithms are optimized for contiguous x values
-    fn set_pixel(&mut self, pos: (usize, usize), color: TPixel);
+    fn set_pixel<T: Into<(usize, usize)>>(&mut self, pos: T, color: TColor);
 
     /// Get a pixel
-    fn get_pixel(&self, pos: (usize, usize)) -> TPixel;
+    fn get_pixel<T: Into<(usize, usize)>>(&self, pos: T) -> TColor;
 
     fn width(&self) -> usize;
 
@@ -30,7 +32,7 @@ pub trait PixelBuffer<TPixel: Clone + Copy> {
         &mut self,
         (x, y): (usize, usize),
         (width, height): (usize, usize),
-        color: TPixel,
+        color: TColor,
     ) {
         // limit to screen
         let x_max = (x + width).min(self.width());
@@ -57,12 +59,14 @@ mod test {
         // use any pixel format you like
         struct MyBuffer(pub [u8; WIDTH * HEIGHT]);
 
-        impl PixelBuffer<u8> for MyBuffer {
-            fn set_pixel(&mut self, (x, y): (usize, usize), value: u8) {
+        impl PixelBuffer<u8, u8> for MyBuffer {
+            fn set_pixel<T: Into<(usize, usize)>>(&mut self, pos: T, value: u8) {
+                let (x, y) = pos.into();
                 self.0[y * HEIGHT + x] = value;
             }
 
-            fn get_pixel(&self, (x, y): (usize, usize)) -> u8 {
+            fn get_pixel<T: Into<(usize, usize)>>(&self, pos: T) -> u8 {
+                let (x, y) = pos.into();
                 self.0[y * HEIGHT + x]
             }
 
@@ -91,14 +95,16 @@ mod test {
         // contiguous bytes
         struct Rgba32Buffer(pub [u8; WIDTH * HEIGHT * 4]);
 
-        impl PixelBuffer<[u8; 4]> for Rgba32Buffer {
-            fn set_pixel(&mut self, (x, y): (usize, usize), value: [u8; 4]) {
-                for i in 0..4 {
-                    self.0[(y * HEIGHT + x) * 4 + i] = value[i];
-                }
+        impl PixelBuffer<[u8; 4], usize> for Rgba32Buffer {
+            fn set_pixel<T: Into<(usize, usize)>>(&mut self, pos: T, color: [u8; 4]) {
+                let (x, y) = pos.into();
+                let i = (y * HEIGHT + x) * 4;
+                let dst = &mut self.0[i..i + 4];
+                dst.copy_from_slice(&color);
             }
 
-            fn get_pixel(&self, (x, y): (usize, usize)) -> [u8; 4] {
+            fn get_pixel<T: Into<(usize, usize)>>(&self, pos: T) -> [u8; 4] {
+                let (x, y) = pos.into();
                 let i = (y * HEIGHT + x) * 4;
                 self.0[i..i + 4].try_into().unwrap()
             }
