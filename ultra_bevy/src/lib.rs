@@ -9,8 +9,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 use bevy::prelude::*;
 use send_wrapper::SendWrapper;
 pub use ultra_crustaceous::Color as UltraColor;
-use ultra_crustaceous::{OutputBuffer, PaletteBuffer};
 pub use ultra_crustaceous::{self};
+use ultra_crustaceous::{OutputBuffer, PaletteBuffer, SCREEN_HEIGHT, SCREEN_WIDTH};
 use wasm_bindgen::prelude::*;
 
 // everything has to be static state, but we hide that as best as we can from the user

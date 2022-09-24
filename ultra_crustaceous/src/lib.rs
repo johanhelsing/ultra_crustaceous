@@ -34,14 +34,35 @@ impl OutputBuffer {
         self[i] = color;
     }
 
-    /// Fills a rectangular area with a single color
-    pub fn fill_rect(&mut self, x: usize, y: usize, width: usize, height: usize, color: u8) {
-        for y in y..y + height {
-            // inner loop on x for efficient memory access
-            for x in x..x + width {
-                self.set_pixel(x, y, color);
-            }
-        }
+    /// Gets a pixel
+    #[inline]
+    pub fn get_pixel(&self, x: usize, y: usize) -> u8 {
+        debug_assert!(x < SCREEN_WIDTH);
+        let i = x + y * SCREEN_WIDTH;
+        self[i]
+    }
+}
+
+#[cfg(feature = "rastateur")]
+impl rastateur::PixelBuffer<u8> for OutputBuffer {
+    #[inline]
+    fn set_pixel(&mut self, (x, y): (usize, usize), color: u8) {
+        self.set_pixel(x as usize, y as usize, color);
+    }
+
+    #[inline]
+    fn get_pixel(&self, (x, y): (usize, usize) -> u8 {
+        self.get_pixel(x, y)
+    }
+
+    #[inline]
+    fn width(&self) -> usize {
+        SCREEN_WIDTH
+    }
+
+    #[inline]
+    fn height(&self) -> usize {
+        SCREEN_HEIGHT
     }
 }
 

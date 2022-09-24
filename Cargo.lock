@@ -2867,6 +2867,7 @@ dependencies = [
  "derive_more",
  "iyes_loopless",
  "once_cell",
+ "rastateur",
  "send_wrapper",
  "ultra_bevy_derive",
  "ultra_crustaceous",
@@ -2904,6 +2905,7 @@ version = "0.1.0"
 dependencies = [
  "bitflags",
  "derive_more",
+ "rastateur",
 ]
 
 [[package]]
