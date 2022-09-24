@@ -68,6 +68,32 @@ impl rastateur::PixelBuffer<u8> for OutputBuffer {
     }
 }
 
+// todo: maybe do blanket impls for this?
+#[cfg(feature = "rastateur")]
+impl rastateur::PixelBuffer<u8, i32> for OutputBuffer {
+    #[inline]
+    fn set_pixel<TPos: Into<(i32, i32)>>(&mut self, pos: TPos, color: u8) {
+        let (x, y) = pos.into();
+        OutputBuffer::set_pixel(self, x as usize, y as usize, color);
+    }
+
+    #[inline]
+    fn get_pixel<TPos: Into<(i32, i32)>>(&self, pos: TPos) -> u8 {
+        let (x, y) = pos.into();
+        OutputBuffer::get_pixel(self, x as usize, y as usize)
+    }
+
+    #[inline]
+    fn width(&self) -> i32 {
+        SCREEN_WIDTH as i32
+    }
+
+    #[inline]
+    fn height(&self) -> i32 {
+        SCREEN_HEIGHT as i32
+    }
+}
+
 #[derive(Deref, DerefMut)]
 pub struct PaletteBuffer([Color; PALETTE_COLORS]);
 

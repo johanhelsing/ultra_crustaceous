@@ -247,7 +247,7 @@ fn draw_background(mut screen: ResMut<OutputBuffer>) {
 
 fn draw_apples(apples: Query<&TilePos, With<Apple>>, mut screen: ResMut<OutputBuffer>) {
     for pos in apples.iter() {
-        draw_tile(&mut *screen, *pos, APPLE_COLOR);
+        draw_tile(screen.as_mut(), *pos, APPLE_COLOR);
     }
 }
 
@@ -274,8 +274,7 @@ const MAP_POS: IVec2 = IVec2::new(
 );
 
 fn draw_tile(buffer: &mut OutputBuffer, tile: TilePos, color: u8) {
-    let start_x = MAP_POS.x as usize + tile.x as usize * TILE_SIZE;
-    let start_y = MAP_POS.y as usize + tile.y as usize * TILE_SIZE;
-    buffer.draw_rect((start_x, start_y), (TILE_SIZE, TILE_SIZE), color);
-    buffer.set_pixel(start_x, start_y, color);
+    let start = MAP_POS + *tile * TILE_SIZE as i32;
+    // buffer.draw_rect(start, IVec2::splat(TILE_SIZE as i32), color);
+    buffer.draw_rect(start, IVec2::splat(TILE_SIZE as i32), color);
 }

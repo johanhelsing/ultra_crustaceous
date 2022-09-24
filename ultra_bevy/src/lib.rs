@@ -19,7 +19,7 @@ static mut BEVY_APP: Option<SendWrapper<App>> = None;
 pub use ultra_bevy_derive::init;
 
 pub mod prelude {
-    pub use crate::{Screen, UltraColor, UltraInput, UltraPlugin};
+    pub use crate::{UltraColor, UltraInput, UltraPlugin};
     pub use rastateur::PixelBuffer;
     pub use ultra_crustaceous::*;
 }
@@ -61,15 +61,6 @@ pub struct UltraInput {
 }
 
 pub struct UltraPlugin;
-
-#[derive(Deref, DerefMut)]
-pub struct Screen(OutputBuffer);
-
-impl Screen {
-    pub fn set_pixel(&mut self, pos: IVec2, color: u8) {
-        self.0.set_pixel(pos.x as usize, pos.y as usize, color);
-    }
-}
 
 impl Plugin for UltraPlugin {
     fn build(&self, app: &mut App) {
