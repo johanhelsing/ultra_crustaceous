@@ -10,7 +10,7 @@ use bevy::prelude::*;
 use send_wrapper::SendWrapper;
 pub use ultra_crustaceous::Color as UltraColor;
 pub use ultra_crustaceous::{self};
-use ultra_crustaceous::{OutputBuffer, PaletteBuffer, SCREEN_HEIGHT, SCREEN_WIDTH};
+use ultra_crustaceous::{OutputBuffer, PaletteBuffer};
 use wasm_bindgen::prelude::*;
 
 // everything has to be static state, but we hide that as best as we can from the user
@@ -20,6 +20,7 @@ pub use ultra_bevy_derive::init;
 
 pub mod prelude {
     pub use crate::{Screen, UltraColor, UltraInput, UltraPlugin};
+    pub use rastateur::PixelBuffer;
     pub use ultra_crustaceous::*;
 }
 

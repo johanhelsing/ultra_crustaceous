@@ -46,12 +46,14 @@ impl OutputBuffer {
 #[cfg(feature = "rastateur")]
 impl rastateur::PixelBuffer<u8> for OutputBuffer {
     #[inline]
-    fn set_pixel(&mut self, (x, y): (usize, usize), color: u8) {
-        self.set_pixel(x as usize, y as usize, color);
+    fn set_pixel<TPos: Into<(usize, usize)>>(&mut self, pos: TPos, color: u8) {
+        let (x, y) = pos.into();
+        self.set_pixel(x, y, color);
     }
 
     #[inline]
-    fn get_pixel(&self, (x, y): (usize, usize) -> u8 {
+    fn get_pixel<TPos: Into<(usize, usize)>>(&self, pos: TPos) -> u8 {
+        let (x, y) = pos.into();
         self.get_pixel(x, y)
     }
 
