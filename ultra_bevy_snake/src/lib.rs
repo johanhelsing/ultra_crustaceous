@@ -12,6 +12,16 @@ use ultra_bevy::prelude::*;
 #[derive(Component, Deref, DerefMut, Clone, Copy, From, PartialEq, Eq)]
 struct TilePos(IVec2);
 
+impl TilePos {
+    fn to_screen_pos(self) -> IVec2 {
+        MAP_POS + self.0 * TILE_SIZE as i32
+    }
+
+    pub fn draw_filled(&self, buffer: &mut OutputBuffer, color: u8) {
+        buffer.draw_rect(self.to_screen_pos(), IVec2::splat(TILE_SIZE as i32), color);
+    }
+}
+
 #[derive(Component, Deref, DerefMut, Clone, Copy, From)]
 struct Direction(IVec2);
 
@@ -238,16 +248,12 @@ fn update_body_dir(
 }
 
 fn draw_background(mut screen: ResMut<OutputBuffer>) {
-    for x in 0..MAP_SIZE.x {
-        for y in 0..MAP_SIZE.y {
-            draw_tile(&mut *screen, TilePos(ivec2(x, y)), MAP_COLOR);
-        }
-    }
+    screen.draw_rect(MAP_POS, MAP_SIZE * TILE_SIZE as i32, MAP_COLOR);
 }
 
 fn draw_apples(apples: Query<&TilePos, With<Apple>>, mut screen: ResMut<OutputBuffer>) {
-    for pos in apples.iter() {
-        draw_tile(screen.as_mut(), *pos, APPLE_COLOR);
+    for tile in apples.iter() {
+        tile.draw_filled(screen.as_mut(), APPLE_COLOR);
     }
 }
 
@@ -261,8 +267,8 @@ fn draw_snake(
         _ => WORM_COLOR,
     };
 
-    for pos in heads.iter() {
-        draw_tile(&mut *screen, *pos, color);
+    for tile in heads.iter() {
+        tile.draw_filled(screen.as_mut(), color);
     }
 }
 
@@ -272,9 +278,3 @@ const MAP_POS: IVec2 = IVec2::new(
     SCREEN_SIZE.x / 2 - MAP_SIZE.x * TILE_SIZE as i32 / 2,
     SCREEN_SIZE.y / 2 - MAP_SIZE.y * TILE_SIZE as i32 / 2,
 );
-
-fn draw_tile(buffer: &mut OutputBuffer, tile: TilePos, color: u8) {
-    let start = MAP_POS + *tile * TILE_SIZE as i32;
-    // buffer.draw_rect(start, IVec2::splat(TILE_SIZE as i32), color);
-    buffer.draw_rect(start, IVec2::splat(TILE_SIZE as i32), color);
-}

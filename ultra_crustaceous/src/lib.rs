@@ -29,17 +29,27 @@ impl OutputBuffer {
     /// Set a single pixel to the given color
     #[inline]
     pub fn set_pixel(&mut self, x: usize, y: usize, color: u8) {
-        debug_assert!(x < SCREEN_WIDTH);
-        let i = x + y * SCREEN_WIDTH;
+        debug_assert!(x < Self::width());
+        let i = x + y * Self::width();
         self[i] = color;
     }
 
     /// Gets a pixel
     #[inline]
     pub fn get_pixel(&self, x: usize, y: usize) -> u8 {
-        debug_assert!(x < SCREEN_WIDTH);
-        let i = x + y * SCREEN_WIDTH;
+        debug_assert!(x < Self::width());
+        let i = x + y * Self::width();
         self[i]
+    }
+
+    #[inline]
+    pub const fn width() -> usize {
+        SCREEN_WIDTH
+    }
+
+    #[inline]
+    pub const fn height() -> usize {
+        SCREEN_HEIGHT
     }
 }
 
@@ -59,16 +69,16 @@ impl rastateur::PixelBuffer<u8> for OutputBuffer {
 
     #[inline]
     fn width(&self) -> usize {
-        SCREEN_WIDTH
+        Self::width()
     }
 
     #[inline]
     fn height(&self) -> usize {
-        SCREEN_HEIGHT
+        Self::height()
     }
 }
 
-// todo: maybe do blanket impls for this?
+// todo: maybe do blanket impls for this in rastateur?
 #[cfg(feature = "rastateur")]
 impl rastateur::PixelBuffer<u8, i32> for OutputBuffer {
     #[inline]
@@ -85,12 +95,12 @@ impl rastateur::PixelBuffer<u8, i32> for OutputBuffer {
 
     #[inline]
     fn width(&self) -> i32 {
-        SCREEN_WIDTH as i32
+        Self::width() as i32
     }
 
     #[inline]
     fn height(&self) -> i32 {
-        SCREEN_HEIGHT as i32
+        Self::height() as i32
     }
 }
 

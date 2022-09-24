@@ -27,7 +27,6 @@ pub trait PixelBuffer<TColor: Clone + Copy, TAxis: Integer + Copy = usize> {
 
     // todo: could perhaps move these to extension traits instead?
 
-    #[inline]
     fn draw_rect<TPos: Into<(TAxis, TAxis)>>(&mut self, pos: TPos, size: TPos, color: TColor) {
         // limit to screen
         let (x, y) = pos.into();
@@ -41,6 +40,29 @@ pub trait PixelBuffer<TColor: Clone + Copy, TAxis: Integer + Copy = usize> {
             // inner loop on x for efficient memory access
             for x in StepRange(x, x_max) {
                 self.set_pixel((x, y), color);
+            }
+        }
+    }
+
+    fn draw_rect_with<TPos: Into<(TAxis, TAxis)>, TArg: From<(TAxis, TAxis)>>(
+        &mut self,
+        pos: TPos,
+        size: TPos,
+        color_fn: fn(TArg) -> TColor,
+    ) {
+        // limit to screen
+        let (x, y) = pos.into();
+        let (width, height) = size.into();
+        let x_max = (x + width).min(self.width());
+        let y_max = (y + height).min(self.height());
+
+        // todo: use core::iter::Step when stable
+        // for y in y..y_max {
+        for y in StepRange(y, y_max) {
+            // inner loop on x for efficient memory access
+            for x in StepRange(x, x_max) {
+                let pos = (x, y);
+                self.set_pixel(pos, color_fn(pos.into()));
             }
         }
     }
