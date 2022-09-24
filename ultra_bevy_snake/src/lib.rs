@@ -118,10 +118,10 @@ impl SnakeBodyBundle {
     }
 }
 
-const BORDER_COLOR: u8 = 18;
-const MAP_COLOR: u8 = 0;
-const WORM_COLOR: u8 = 16;
-const APPLE_COLOR: u8 = 3;
+const BORDER_COLOR: u8 = 9;
+const MAP_COLOR: u8 = 8;
+const WORM_COLOR: u8 = 17;
+const APPLE_COLOR: u8 = 14;
 const APPLE_STEM_COLOR: u8 = 19;
 const DEAD_WORM_COLOR: u8 = 14;
 
