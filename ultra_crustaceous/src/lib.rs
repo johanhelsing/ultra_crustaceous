@@ -46,41 +46,15 @@ impl ScreenBuffer {
 #[cfg(feature = "rastateur")]
 impl rastateur::PixelBuffer<u8> for ScreenBuffer {
     #[inline]
-    fn set_pixel<TPos: Into<(usize, usize)>>(&mut self, pos: TPos, color: u8) {
-        let (x, y) = pos.into();
-        self.set_pixel(x, y, color);
-    }
-
-    #[inline]
-    fn get_pixel<TPos: Into<(usize, usize)>>(&self, pos: TPos) -> u8 {
-        let (x, y) = pos.into();
-        self.get_pixel(x, y)
-    }
-
-    #[inline]
-    fn width(&self) -> usize {
-        Self::WIDTH
-    }
-
-    #[inline]
-    fn height(&self) -> usize {
-        Self::HEIGHT
-    }
-}
-
-// todo: maybe do blanket impls for this in rastateur?
-#[cfg(feature = "rastateur")]
-impl rastateur::PixelBuffer<u8, i32> for ScreenBuffer {
-    #[inline]
     fn set_pixel<TPos: Into<(i32, i32)>>(&mut self, pos: TPos, color: u8) {
         let (x, y) = pos.into();
-        ScreenBuffer::set_pixel(self, x as usize, y as usize, color);
+        self.set_pixel(x as usize, y as usize, color);
     }
 
     #[inline]
     fn get_pixel<TPos: Into<(i32, i32)>>(&self, pos: TPos) -> u8 {
         let (x, y) = pos.into();
-        ScreenBuffer::get_pixel(self, x as usize, y as usize)
+        self.get_pixel(x as usize, y as usize)
     }
 
     #[inline]

@@ -24,7 +24,7 @@ const TICKS_PER_STEP: usize = 5;
 struct TilePos(IVec2);
 
 impl TilePos {
-    fn to_screen_pos(self) -> IVec2 {
+    pub fn to_screen_pos(self) -> IVec2 {
         MAP_POS + self.0 * TILE_SIZE as i32
     }
 
@@ -118,17 +118,30 @@ impl SnakeBodyBundle {
     }
 }
 
-const BORDER_COLOR: u8 = 0;
-const MAP_COLOR: u8 = 1;
-const WORM_COLOR: u8 = 2;
+const BORDER_COLOR: u8 = 18;
+const MAP_COLOR: u8 = 0;
+const WORM_COLOR: u8 = 16;
 const APPLE_COLOR: u8 = 3;
-const DEAD_WORM_COLOR: u8 = APPLE_COLOR;
+const APPLE_STEM_COLOR: u8 = 19;
+const DEAD_WORM_COLOR: u8 = 14;
 
-fn setup(mut commands: Commands, mut palette: ResMut<PaletteBuffer>) {
-    palette[BORDER_COLOR as usize] = UltraColor::from_rgb(0x302c2e); // dark brown
-    palette[MAP_COLOR as usize] = UltraColor::from_rgb(0x7d7071); // light brown
-    palette[WORM_COLOR as usize] = UltraColor::from_rgb(0x71aa34); // green
-    palette[APPLE_COLOR as usize] = UltraColor::from_rgb(0xa93b3b); // deep red
+fn setup(
+    mut commands: Commands,
+    mut palette: ResMut<PaletteBuffer>,
+    mut screen: ResMut<ScreenBuffer>,
+) {
+    // https://lospec.com/palette-list/autumn-glow
+    const AUTUMN_GLOW: [u32; 20] = [
+        0xffffe1, 0xffd8a9, 0xffb366, 0xff5b4f, 0xf2af92, 0xf39d91, 0xd38e84, 0xc37289, 0xad82cf,
+        0x8455a9, 0x794d81, 0x4a3778, 0xa9548a, 0x814d6e, 0xc92e70, 0x9e2081, 0x7e9770, 0x5d7668,
+        0x235a63, 0x533a44,
+    ];
+
+    for (i, color) in AUTUMN_GLOW.into_iter().enumerate() {
+        palette[i] = UltraColor::from_rgb(color);
+    }
+
+    screen.clear(BORDER_COLOR);
 
     let start_pos = TilePos(MAP_SIZE / 2);
 
@@ -260,7 +273,19 @@ fn draw_background(mut screen: ResMut<ScreenBuffer>) {
 
 fn draw_apples(apples: Query<&TilePos, With<Apple>>, mut screen: ResMut<ScreenBuffer>) {
     for tile in apples.iter() {
-        tile.draw_filled(screen.as_mut(), APPLE_COLOR);
+        let pos = tile.to_screen_pos();
+
+        screen.draw_circle(
+            pos.as_vec2() + Vec2::splat(TILE_SIZE as f32 / 2.),
+            4.,
+            APPLE_COLOR,
+        );
+
+        screen.draw_rect(
+            pos + ivec2((TILE_SIZE / 2) as i32 - 1, TILE_SIZE as i32 - 2),
+            ivec2(2, 2),
+            APPLE_STEM_COLOR,
+        );
     }
 }
 

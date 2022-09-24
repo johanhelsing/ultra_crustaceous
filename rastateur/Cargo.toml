@@ -7,4 +7,3 @@ edition = "2021"
 crate-type = ["lib"]
 
 [dependencies]
-num-integer = { version = "0.1.45", default-features = false }
